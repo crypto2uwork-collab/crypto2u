@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
   <head>
@@ -5,12 +6,18 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%234f46e5'/%3E%3Cpath d='M55 20 L65 45 L90 45 L45 85 L55 55 L30 55 Z' fill='%23facc15' stroke='white' stroke-width='4'/%3E%3C/svg%3E" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Crypto2u - Khởi đầu hành trình Crypto</title>
+    
+    <!-- Shim cho process.env để chạy được trên trình duyệt mà không cần bundler -->
+    <script>
+      window.process = window.process || { env: { GEMINI_API_KEY: "" } };
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
       tailwind.config = {
-        darkMode: 'class', // Enables dark mode via class strategy
+        darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
@@ -18,9 +25,8 @@
               display: ['Space Grotesk', 'sans-serif'],
             },
             colors: {
-              primary: '#4f46e5', // Indigo 600
-              secondary: '#9333ea', // Purple 600
-              // Semantic colors mapping to CSS variables
+              primary: '#4f46e5',
+              secondary: '#9333ea',
               background: 'var(--bg-body)',
               surface: 'var(--bg-card)',
               border: 'var(--border-card)',
@@ -46,24 +52,22 @@
     </script>
     <style>
       :root {
-        /* HIGH CONTRAST LIGHT MODE */
-        --bg-body: #F1F5F9; /* Slate 100 - Darker than 50 for better card separation */
-        --bg-card: #FFFFFF; /* Pure White */
-        --border-card: #CBD5E1; /* Slate 300 - Stronger border */
-        --text-primary: #020617; /* Slate 950 - Almost Black for Headings */
-        --text-secondary: #334155; /* Slate 700 - Dark Grey for Body text (High legibility) */
+        --bg-body: #F1F5F9;
+        --bg-card: #FFFFFF;
+        --border-card: #CBD5E1;
+        --text-primary: #020617;
+        --text-secondary: #334155;
         --accent-glow: rgba(79, 70, 229, 0.08);
         --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
       }
 
-      /* DARK MODE OVERRIDES (Applied when 'dark' class is present on html/body) */
       .dark {
-        --bg-body: #020617; /* Slate 950 - Deep Space */
-        --bg-card: #1E293B; /* Slate 800 - Lighter than background for card effect */
-        --border-card: #334155; /* Slate 700 */
-        --text-primary: #F8FAFC; /* Slate 50 - High brightness white */
-        --text-secondary: #CBD5E1; /* Slate 300 - Light Grey for Body */
+        --bg-body: #020617;
+        --bg-card: #1E293B;
+        --border-card: #334155;
+        --text-primary: #F8FAFC;
+        --text-secondary: #CBD5E1;
         --accent-glow: rgba(79, 70, 229, 0.15);
         --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.3);
         --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.4);
@@ -72,22 +76,20 @@
       body {
         background-color: var(--bg-body);
         color: var(--text-primary);
-        line-height: 1.7; /* Increased line height for readability */
+        line-height: 1.7;
         -webkit-font-smoothing: antialiased;
         transition: background-color 0.3s ease, color 0.3s ease;
       }
 
-      /* Headings specifically */
       h1, h2, h3, h4, h5, h6 {
         color: var(--text-primary);
-        letter-spacing: -0.02em; /* Tighter tracking for headings */
+        letter-spacing: -0.02em;
       }
 
       p, li, span {
         color: var(--text-secondary);
       }
       
-      /* Subtle background pattern */
       body::before {
         content: "";
         position: fixed;
@@ -102,7 +104,6 @@
         pointer-events: none;
       }
       
-      /* Modern Card Style */
       .glass-panel, .card {
         background-color: var(--bg-card);
         border: 1px solid var(--border-card);
@@ -114,7 +115,7 @@
       }
 
       .card:hover {
-        border-color: #6366f1; /* Indigo 500 */
+        border-color: #6366f1;
         box-shadow: var(--shadow-hover);
         transform: translateY(-2px);
       }
@@ -122,13 +123,12 @@
       .gradient-text {
         background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
         -webkit-background-clip: text;
+        background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800;
-        /* Fallback for readability if gradient fails */
         color: #4f46e5;
       }
 
-      /* Custom Scrollbar */
       ::-webkit-scrollbar {
         width: 10px;
       }
@@ -136,12 +136,12 @@
         background: var(--bg-body); 
       }
       ::-webkit-scrollbar-thumb {
-        background: #94a3b8; /* Slate 400 */
+        background: #94a3b8;
         border-radius: 5px;
         border: 2px solid var(--bg-body);
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #64748b; /* Slate 500 */
+        background: #64748b;
       }
     </style>
   <script type="importmap">
@@ -157,10 +157,10 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
   <body>
     <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
-</body>
+    <!-- Đảm bảo tệp entry point được nạp đúng cách dưới dạng module -->
+    <script type="module" src="./index.tsx"></script>
+  </body>
 </html>
