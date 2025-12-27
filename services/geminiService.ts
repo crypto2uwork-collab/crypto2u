@@ -70,7 +70,7 @@ export const askCryptoTutor = async (
 };
 
 export const fetchCryptoNews = async (query?: string): Promise<AgentResponse> => {
-  const apiKey = process.env.API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     console.error("API Key not found");
     return { news: [], sources: [] };
