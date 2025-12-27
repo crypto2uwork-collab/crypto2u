@@ -1,239 +1,116 @@
 
 import { GoogleGenAI } from "@google/genai";
 import { ChatMessage, AgentResponse, NewsItem } from "../types";
-import { articles, glossary } from "../data/content";
+import { fetchNewsFallbackRaw } from "./hfService";
 
-export const askCryptoTutor = async (
-  currentMessage: string, 
-  history: ChatMessage[] = []
-): Promise<string> => {
+const getAIClient = () => {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return "Lỗi cấu hình: Chưa tìm thấy API Key. Vui lòng kiểm tra cài đặt môi trường.";
-  }
-
-  // Tối ưu hóa dữ liệu ngữ cảnh (Context) để tránh gửi payload quá lớn
-  const glossaryContext = glossary.slice(0, 30).map(g => `- ${g.term}: ${g.definition}`).join('\n');
-  const articlesContext = articles.map(a => `- Bài viết "${a.title}": ${a.description}`).join('\n');
-
-  const MAX_RETRIES = 2;
-  let retryCount = 0;
-
-  while (retryCount < MAX_RETRIES) {
-    try {
-      // Fix: Create instance right before use
-      const ai = new GoogleGenAI({ apiKey });
-      // Fix: Use supported Gemini 3 model for text tasks
-      const model = "gemini-3-flash-preview";
-      
-      const systemInstruction = `
-      Bạn là "Crypto2u AI", trợ lý AI chuyên về Crypto.
-      
-      DỮ LIỆU WEBSITE:
-      [TỪ ĐIỂN]
-      ${glossaryContext}
-      
-      [BÀI VIẾT]
-      ${articlesContext}
-
-      YÊU CẦU:
-      1. Trả lời ngắn gọn (dưới 150 từ), thân thiện, dùng tiếng Việt.
-      2. Nếu câu hỏi có trong dữ liệu trên, hãy dùng nó để trả lời.
-      3. Không đưa ra lời khuyên đầu tư tài chính (NFA).
-      `;
-
-      const chat = ai.chats.create({
-        model: model,
-        config: {
-          systemInstruction: systemInstruction,
-          temperature: 0.7,
-        },
-        history: history
-      });
-
-      const response = await chat.sendMessage({ message: currentMessage });
-
-      // Fix: Directly access .text property
-      return response.text || "Xin lỗi, tôi không thể trả lời ngay lúc này.";
-    } catch (error: any) {
-      console.error(`Gemini Chat Error (Attempt ${retryCount + 1}):`, error);
-      
-      retryCount++;
-      if (retryCount >= MAX_RETRIES) {
-        return "Hiện tại tôi đang gặp sự cố kết nối. Vui lòng thử lại sau giây lát.";
-      }
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-  }
-  
-  return "Không thể kết nối với AI.";
+  if (!apiKey) throw new Error("API Key missing");
+  return new GoogleGenAI({ apiKey });
 };
 
-export const fetchCryptoNews = async (query?: string): Promise<AgentResponse> => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.error("API Key not found");
-    return { news: [], sources: [] };
-  }
-
+/**
+ * AI NEWS AGENT: Xử lý dữ liệu từ các nguồn tin tức hàng đầu thế giới
+ */
+export const fetchCryptoNews = async (query?: string): Promise<AgentResponse & { isFallback?: boolean }> => {
   try {
-    // Fix: Create instance right before use
-    const ai = new GoogleGenAI({ apiKey });
-    // Fix: Use supported Gemini 3 model for search grounding
-    const model = "gemini-3-flash-preview";
-
-    let searchPrompt = "Tìm kiếm các tin tức Crypto nổi bật mới nhất trong 24h qua từ các nguồn uy tín quốc tế (CoinDesk, TheBlock, Bloomberg, Cointelegraph...).";
-    if (query) {
-      searchPrompt = `Tìm kiếm các tin tức mới nhất về "${query}" trong thế giới Crypto trong 24h qua.`;
+    // 1. Lấy dữ liệu tin tức nóng nhất từ hệ thống tin tức toàn cầu (CryptoCompare/CryptoPanic)
+    const rawData = await fetchNewsFallbackRaw(query || "ALL");
+    
+    if (!rawData || rawData.length === 0) {
+        return { news: [], sources: [], isFallback: true };
     }
 
-    const prompt = `
-      ${searchPrompt}
-      Tổng hợp thành danh sách tối đa 6 tin quan trọng nhất.
-      
-      Yêu cầu định dạng JSON chính xác:
+    // 2. Sử dụng Gemini Flash làm Agent xử lý ngôn ngữ và phân tích
+    const ai = getAIClient();
+    const model = "gemini-3-flash-preview";
+
+    const agentPrompt = `
+      VAI TRÒ: Bạn là "Crypto2u Intel Agent" - Chuyên gia phân tích tin tức thị trường.
+      NHIỆM VỤ: Dịch, tóm tắt và phân tích danh sách tin tức sau đây sang tiếng Việt.
+
+      DỮ LIỆU ĐẦU VÀO:
+      ${JSON.stringify(rawData)}
+
+      YÊU CẦU XỬ LÝ:
+      1. Ngôn ngữ: Dịch Tiêu đề (title) sang tiếng Việt thu hút.
+      2. Tóm tắt: Viết lại nội dung (summary) thành 2-3 câu súc tích bằng tiếng Việt chuyên ngành.
+      3. Đánh giá (Sentiment): Xác định tin này là "Tích cực", "Tiêu cực" hoặc "Trung lập".
+      4. Thời gian: Chuyển đổi timestamp thành định dạng dễ đọc như "15 phút trước".
+
+      TRẢ VỀ ĐỊNH DẠNG JSON:
       {
         "news": [
-          {
-            "title": "Tiêu đề dịch sang tiếng Việt",
-            "summary": "Tóm tắt nội dung chính (khoảng 20-30 từ) bằng tiếng Việt",
-            "source": "Tên nguồn (VD: CoinDesk)",
-            "time": "Thời gian (VD: 2 giờ trước)"
-          }
+          { "title": "...", "summary": "...", "source": "...", "time": "...", "url": "...", "sentiment": "Tích cực | Tiêu cực | Trung lập" }
         ]
       }
-      
-      Chỉ trả về JSON, không thêm văn bản dẫn dắt.
     `;
 
     const response = await ai.models.generateContent({
       model: model,
-      contents: prompt,
-      config: {
-        tools: [{ googleSearch: {} }],
+      contents: agentPrompt,
+      config: { 
+        temperature: 0.2,
+        responseMimeType: "application/json"
       },
     });
 
-    // Fix: Directly access .text property
-    const text = response.text || "{}";
-    let newsData: { news: NewsItem[] } = { news: [] };
+    const newsData = JSON.parse(response.text || '{"news":[]}');
 
-    try {
-      const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-      const firstBrace = cleanText.indexOf('{');
-      const lastBrace = cleanText.lastIndexOf('}');
-      if (firstBrace !== -1 && lastBrace !== -1) {
-          const jsonStr = cleanText.substring(firstBrace, lastBrace + 1);
-          newsData = JSON.parse(jsonStr);
-      } else {
-          newsData = JSON.parse(cleanText);
-      }
-    } catch (e) {
-      console.warn("Failed to parse JSON from news response. Raw text:", text);
-    }
-
-    const sources: { title: string; uri: string }[] = [];
-    const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
-    
-    if (groundingChunks) {
-      groundingChunks.forEach((chunk: any) => {
-        if (chunk.web) {
-          sources.push({
-            title: chunk.web.title || "Source",
-            uri: chunk.web.uri || "#"
-          });
-        }
-      });
-    }
-
-    const uniqueSources = Array.from(new Map(sources.map(item => [item.uri, item])).values()).slice(0, 5);
-
-    return {
-      news: newsData.news || [],
-      sources: uniqueSources
+    return { 
+      news: newsData.news || [], 
+      sources: rawData.map(n => ({ title: n.source, uri: n.url })),
+      isFallback: false 
     };
 
-  } catch (error) {
-    console.error("Gemini News Fetch Error:", error);
-    return { news: [], sources: [] };
+  } catch (error: any) {
+    console.error("News Agent Error:", error);
+    // Trả về dữ liệu thô nếu AI gặp sự cố
+    const rawData = await fetchNewsFallbackRaw(query || "ALL");
+    return { 
+        news: rawData.map(n => ({ ...n, summary: n.body, time: "Vừa cập nhật", sentiment: "Trung lập" })), 
+        sources: [], 
+        isFallback: true 
+    };
   }
 };
 
-export const generateImage = async (prompt: string, size: '1K' | '2K' | '4K'): Promise<string | null> => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.error("API Key not found");
-    return null;
-  }
-
+export const askCryptoTutor = async (currentMessage: string, history: ChatMessage[] = []): Promise<string> => {
   try {
-    // Fix: Create instance right before use
-    const ai = new GoogleGenAI({ apiKey });
-    const model = "gemini-3-pro-image-preview";
-
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: {
-        parts: [{ text: prompt }]
-      },
-      config: {
-        imageConfig: {
-            aspectRatio: "1:1",
-            imageSize: size
-        }
-      }
+    const ai = getAIClient();
+    const chat = ai.chats.create({
+      model: "gemini-3-flash-preview",
+      config: { systemInstruction: "Bạn là chuyên gia Crypto2u. Trả lời bằng tiếng Việt." }
     });
-
-    if (response.candidates && response.candidates.length > 0 && response.candidates[0].content && response.candidates[0].content.parts) {
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) {
-            return `data:image/png;base64,${part.inlineData.data}`;
-        }
-      }
-    }
-    return null;
-  } catch (error) {
-    console.error("Gemini Image Generation Error:", error);
-    return null;
-  }
+    const response = await chat.sendMessage({ message: currentMessage });
+    return response.text || "Tôi gặp sự cố xử lý.";
+  } catch (error) { return "Bot đang bận."; }
 };
 
 export const summarizeText = async (text: string): Promise<string | null> => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.error("API Key not found");
-    return "Lỗi: Chưa cấu hình API Key.";
-  }
-  if (!text.trim()) return null;
-
   try {
-    // Fix: Create instance right before use
-    const ai = new GoogleGenAI({ apiKey });
-    // Fix: Use supported Gemini 3 model for summarization
-    const model = "gemini-3-flash-preview";
-
-    const prompt = `
-      Bạn là một chuyên gia phân tích thị trường Crypto.
-      Nhiệm vụ: Tóm tắt nội dung văn bản dưới đây và dịch sang Tiếng Việt (nếu văn bản gốc là tiếng nước ngoài).
-      
-      Yêu cầu:
-      - Tóm tắt ngắn gọn, tập trung vào các thông tin quan trọng nhất (Key insights).
-      - Văn phong chuyên nghiệp, dễ hiểu cho nhà đầu tư Việt Nam.
-      - Trình bày dạng liệt kê (bullet points) nếu cần thiết.
-      
-      Văn bản cần xử lý:
-      "${text}"
-    `;
-
+    const ai = getAIClient();
     const response = await ai.models.generateContent({
-        model: model,
-        contents: prompt
+        model: "gemini-3-flash-preview",
+        contents: `Tóm tắt tiếng Việt: ${text}`
     });
+    return response.text || null;
+  } catch (e) { return null; }
+};
 
-    // Fix: Directly access .text property
-    return response.text;
-  } catch (error) {
-    console.error("Gemini Summarize Error:", error);
-    return "Xin lỗi, AI đang bận hoặc gặp sự cố kết nối. Vui lòng thử lại sau.";
-  }
+export const generateImage = async (prompt: string, size: '1K' | '2K' | '4K' = '1K'): Promise<string | null> => {
+  try {
+    const ai = getAIClient();
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-image-preview',
+      contents: { parts: [{ text: prompt }] },
+      config: { imageConfig: { aspectRatio: "1:1", imageSize: size } },
+    });
+    if (response.candidates?.[0]?.content?.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
+      }
+    }
+    return null;
+  } catch (e) { return null; }
 };

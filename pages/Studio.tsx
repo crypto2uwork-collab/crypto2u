@@ -4,16 +4,13 @@ import { generateImage } from '../services/geminiService';
 import { useSettings } from '../context/SettingsContext';
 import { Sparkles, Download, Image as ImageIcon, Loader2, Key } from 'lucide-react';
 
-// Define global interface for aistudio window object
-// Fix: Extension of global interface AIStudio to avoid conflicting types on window.aistudio
 declare global {
-  interface AIStudio {
-    hasSelectedApiKey: () => Promise<boolean>;
-    openSelectKey: () => Promise<void>;
-  }
-  interface Window {
-    aistudio?: AIStudio;
-  }
+    interface Window {
+        aistudio: {
+            hasSelectedApiKey(): Promise<boolean>;
+            openSelectKey(): Promise<void>;
+        };
+    }
 }
 
 const Studio = () => {
@@ -24,9 +21,10 @@ const Studio = () => {
     const [loading, setLoading] = useState(false);
     const [hasKey, setHasKey] = useState<boolean>(false);
 
-    // Fix: Check for selected API key on component mount as required by Imagen/Gemini 3 Pro guidelines
+    // Initial check for an existing API key selection on component mount.
     useEffect(() => {
         const checkKey = async () => {
+            // Check if window.aistudio is available and if a key has already been selected.
             if (window.aistudio) {
                 const selected = await window.aistudio.hasSelectedApiKey();
                 setHasKey(selected);
@@ -35,11 +33,11 @@ const Studio = () => {
         checkKey();
     }, []);
 
-    // Fix: Handle API key selection dialog
+    // Initiates the API key selection dialog provided by the platform.
     const handleSelectKey = async () => {
         if (window.aistudio) {
             await window.aistudio.openSelectKey();
-            // Guidelines: assume success after triggering the dialog to avoid race conditions
+            // Assume the user successfully selected a key to avoid connection race conditions.
             setHasKey(true);
         }
     };
@@ -63,7 +61,7 @@ const Studio = () => {
         document.body.removeChild(link);
     }
 
-    // Fix: Show key selection UI if no key is selected
+    // Mandatory key selection barrier for gemini-3-pro-image-preview.
     if (!hasKey) {
         return (
             <div className="min-h-screen pt-24 pb-20 px-6 flex items-center justify-center">
