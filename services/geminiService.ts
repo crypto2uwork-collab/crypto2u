@@ -7,7 +7,7 @@ export const askCryptoTutor = async (
   currentMessage: string, 
   history: ChatMessage[] = []
 ): Promise<string> => {
-  const apiKey = process.env.API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return "Lỗi cấu hình: Chưa tìm thấy API Key. Vui lòng kiểm tra cài đặt môi trường.";
   }
