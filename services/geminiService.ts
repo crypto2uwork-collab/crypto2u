@@ -9,11 +9,11 @@ import { fetchNewsFallbackRaw } from "./hfService";
  */
 const getAIClient = () => {
   if (!process.env.GEMINI_API_KEY) throw new Error("API Key missing");
-  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+  return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 };
 
 /**
- * AI NEWS AGENT: Chỉ tìm kiếm tin tức trong lĩnh vực Crypto
+ * AI NEWS AGENT: Thông minh hơn trong việc nhận diện dự án Crypto
  */
 export const fetchCryptoNews = async (query?: string): Promise<AgentResponse & { isFallback?: boolean }> => {
   const ai = getAIClient();
@@ -21,56 +21,71 @@ export const fetchCryptoNews = async (query?: string): Promise<AgentResponse & {
 
   try {
     if (query && query.trim() !== "" && query !== "ALL") {
-      // Prompt thắt chặt phạm vi tìm kiếm chỉ trong Crypto
-      const searchPrompt = `Bạn là một chuyên gia phân tích tin tức Crypto. 
-      Nhiệm vụ: Tìm kiếm 5-8 tin tức mới nhất về từ khóa: "${query}".
+      // Prompt được tinh chỉnh để nhận diện cả các dự án mới nổi (Monad, Berachain, etc.)
+      const searchPrompt = `Bạn là một chuyên gia phân tích thị trường Crypto toàn cầu.
+      NHIỆM VỤ: Tìm kiếm và tóm tắt 5-8 tin tức mới nhất về: "${query}".
       
-      QUY TẮC NGHIÊM NGẶT:
-      1. CHỈ TRẢ VỀ tin tức nếu từ khóa liên quan đến: Tiền điện tử, Blockchain, Web3, DeFi, NFT, Đào coin, Quy định pháp lý về crypto, hoặc các dự án crypto cụ thể.
-      2. Nếu từ khóa KHÔNG LIÊN QUAN đến Crypto (ví dụ: nấu ăn, du lịch, chính trị không liên quan crypto...), hãy trả về kết quả rỗng (không có dòng tin nào).
-      3. Viết tiêu đề và tóm tắt bằng tiếng Việt chuyên nghiệp.
-      4. Phân tích Sentiment (Tích cực/Tiêu cực/Trung lập).`;
+      QUY TẮC NHẬN DIỆN LĨNH VỰC:
+      1. Chấp nhận các từ khóa liên quan đến: Bitcoin, Altcoins, DeFi, NFT, Layer 1/2/3, Web3, Blockchain, Mining, GameFi, và TẤT CẢ các tên dự án blockchain mới (ví dụ: Monad, Berachain, Celestia, Movement, etc.).
+      2. Nếu từ khóa là một dự án công nghệ blockchain hoặc tài chính số, hãy coi đó là HỢP LỆ.
+      3. Chỉ từ chối các chủ đề hoàn toàn không liên quan (ví dụ: "cách nấu ăn", "thời trang trẻ em", "bóng đá thế giới").
+      
+      YÊU CẦU ĐẦU RA:
+      - Liệt kê các tin tức theo định dạng: [Tiêu đề]: [Tóm tắt ngắn gọn].
+      - Phân tích sắc thái (Sentiment): Tích cực, Tiêu cực hoặc Trung lập.
+      - Ngôn ngữ: Tiếng Việt.`;
 
       const response = await ai.models.generateContent({
         model: model,
         contents: searchPrompt,
         config: { 
           tools: [{ googleSearch: {} }],
-          temperature: 0.1 // Giảm độ sáng tạo để tăng độ chính xác
+          temperature: 0.2 // Tăng nhẹ độ sáng tạo để AI linh hoạt hơn trong nhận diện
         },
       });
 
       const rawText = response.text || "";
       const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
       
-      // Nếu AI trả về nội dung nhưng không có nguồn thực tế hoặc nội dung quá ngắn, coi như không tìm thấy
-      if (rawText.length < 50 || groundingChunks.length === 0) {
+      // Nếu không có nguồn dẫn hoặc kết quả quá sơ sài, AI có thể đã từ chối hoặc không tìm thấy
+      if (groundingChunks.length === 0 && rawText.length < 100) {
         return { news: [], sources: [], isFallback: false };
       }
 
-      const newsLines = rawText.split('\n').filter(line => line.trim().length > 20);
+      // Tách dòng tin tức thông minh hơn
+      const newsLines = rawText.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 30 && (line.includes(':') || line.includes('-')));
+
       const sources = groundingChunks.map((chunk: any) => ({
-        title: chunk.web?.title || "Nguồn tin Crypto",
+        title: chunk.web?.title || "Nguồn tin thị trường",
         uri: chunk.web?.uri || "#"
       }));
 
-      const news = newsLines.slice(0, 8).map((line, index) => ({
-        title: line.split(':')[0]?.replace(/^\d+\.\s*/, '') || "Tin tức Thị trường",
-        summary: line,
-        source: sources[index]?.title || "Crypto Analysis",
-        time: "Mới cập nhật",
-        sentiment: line.includes("Tích cực") ? "Tích cực" : line.includes("Tiêu cực") ? "Tiêu cực" : "Trung lập",
-        url: sources[index]?.uri || "#"
-      }));
+      const news = newsLines.slice(0, 8).map((line, index) => {
+        const parts = line.split(':');
+        const title = parts[0]?.replace(/^(\d+\.|\*|-)\s*/, '').trim() || "Cập nhật thị trường";
+        const summary = parts.slice(1).join(':').trim() || line;
+        
+        return {
+          title: title,
+          summary: summary,
+          source: sources[index]?.title || "Crypto Analytics",
+          time: "Mới cập nhật",
+          sentiment: line.toLowerCase().includes("tích cực") ? "Tích cực" : 
+                     line.toLowerCase().includes("tiêu cực") ? "Tiêu cực" : "Trung lập",
+          url: sources[index]?.uri || "#"
+        };
+      });
 
-      return { news, sources, isFallback: false };
+      return { news, sources, isFallback: news.length === 0 };
     }
 
-    // TRƯỜNG HỢP 2: TIN TỨC TỔNG HỢP (Luôn mặc định là Crypto từ Feed)
+    // FALLBACK: Tin tức tổng hợp nếu không có query
     const rawData = await fetchNewsFallbackRaw("ALL");
     if (!rawData || rawData.length === 0) return { news: [], sources: [], isFallback: true };
 
-    const agentPrompt = `Dịch và tóm tắt tin tức crypto sau sang tiếng Việt: ${JSON.stringify(rawData)}.`;
+    const agentPrompt = `Tóm tắt các tin tức crypto sau sang tiếng Việt chuyên nghiệp: ${JSON.stringify(rawData)}.`;
 
     const response = await ai.models.generateContent({
       model: model,
@@ -118,7 +133,7 @@ export const askCryptoTutor = async (currentMessage: string, history: ChatMessag
     const ai = getAIClient();
     const chat = ai.chats.create({
       model: "gemini-3-flash-preview",
-      config: { systemInstruction: "Bạn là chuyên gia Crypto2u. Chỉ trả lời các câu hỏi liên quan đến lĩnh vực tiền điện tử, blockchain và tài chính số bằng tiếng Việt. Nếu người dùng hỏi ngoài lĩnh vực này, hãy lịch sự từ chối và hướng dẫn họ hỏi về Crypto." }
+      config: { systemInstruction: "Bạn là chuyên gia Crypto2u. Trả lời các câu hỏi về crypto, blockchain, airdrop, và các dự án mới (như Monad, Berachain). Nếu người dùng hỏi ngoài ngành, hãy lịch sự từ chối." }
     });
     const response = await chat.sendMessage({ message: currentMessage });
     return response.text || "Tôi gặp sự cố xử lý.";
@@ -141,7 +156,7 @@ export const generateImage = async (prompt: string, size: '1K' | '2K' | '4K' = '
     const ai = getAIClient();
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-image-preview',
-      contents: { parts: [{ text: `A crypto-themed artistic image: ${prompt}` }] },
+      contents: { parts: [{ text: `A professional crypto technology illustration: ${prompt}` }] },
       config: { imageConfig: { aspectRatio: "1:1", imageSize: size } },
     });
     if (response.candidates?.[0]?.content?.parts) {
