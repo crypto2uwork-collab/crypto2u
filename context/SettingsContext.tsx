@@ -145,7 +145,7 @@ const translations = {
     // Help Center
     helpTitle: 'Trung tâm trợ giúp',
     helpSubtitle: 'Chúng tôi có thể giúp gì cho bạn?',
-    chatAI: 'Chat với AI Tutor',
+    chatAI: 'Chat với Crypto2u AI',
     chatAIDesc: 'Hỗ trợ giải đáp kiến thức 24/7.',
     contactSupport: 'Liên hệ Support',
     contactDesc: 'Gửi email cho đội ngũ hỗ trợ.',

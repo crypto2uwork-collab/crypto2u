@@ -5,12 +5,14 @@ import { useSettings } from '../context/SettingsContext';
 import { Sparkles, Download, Image as ImageIcon, Loader2, Key } from 'lucide-react';
 
 // Define global interface for aistudio window object
+// Fix: Extension of global interface AIStudio to avoid conflicting types on window.aistudio
 declare global {
+  interface AIStudio {
+    hasSelectedApiKey: () => Promise<boolean>;
+    openSelectKey: () => Promise<void>;
+  }
   interface Window {
-    aistudio: {
-      hasSelectedApiKey: () => Promise<boolean>;
-      openSelectKey: () => Promise<void>;
-    };
+    aistudio?: AIStudio;
   }
 }
 

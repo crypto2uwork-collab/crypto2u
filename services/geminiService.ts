@@ -27,7 +27,7 @@ export const askCryptoTutor = async (
       const model = "gemini-3-flash-preview";
       
       const systemInstruction = `
-      Bạn là "Crypto2u Tutor", trợ lý AI chuyên về Crypto.
+      Bạn là "Crypto2u AI", trợ lý AI chuyên về Crypto.
       
       DỮ LIỆU WEBSITE:
       [TỪ ĐIỂN]

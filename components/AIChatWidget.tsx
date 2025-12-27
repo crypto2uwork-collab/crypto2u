@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, Loader2 } from 'lucide-react';
 import { askCryptoTutor } from '../services/geminiService';
@@ -7,7 +8,7 @@ const AIChatWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   // State UI
   const [displayMessages, setDisplayMessages] = useState<{role: 'user' | 'model', text: string}[]>([
-    { role: 'model', text: 'Chào bạn! Mình là AI Tutor. Bạn thắc mắc gì về Crypto không? Ví dụ: "Bitcoin là gì?" hay "Làm sao để tạo ví?"' }
+    { role: 'model', text: 'Chào bạn! Mình là Crypto2u AI. Bạn thắc mắc gì về Crypto không? Ví dụ: "Bitcoin là gì?" hay "Làm sao để tạo ví?"' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -75,7 +76,7 @@ const AIChatWidget: React.FC = () => {
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Bot className="w-6 h-6 text-white" />
-              <h3 className="font-bold text-white font-display">Crypto AI Tutor</h3>
+              <h3 className="font-bold text-white font-display">Crypto2u AI</h3>
             </div>
             <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white transition">
               <X size={20} />

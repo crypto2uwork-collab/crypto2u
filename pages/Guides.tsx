@@ -18,8 +18,8 @@ const Guides: React.FC = () => {
        <div className={`card p-6 border-t-4 ${borderClass} mb-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900`}>
           <div className="flex items-center gap-4">
               <div className={`p-2.5 rounded-full bg-white dark:bg-slate-700 shadow-sm ${colorClass}`}>
-                  {/* Fixed: cast icon to React.ReactElement with size prop to satisfy TS requirements */}
-                  {React.cloneElement(icon as React.ReactElement<{ size?: number }>, { size: 20 })}
+                  {/* Fixed: cast icon to any for cloneElement to safely add 'size' prop across all icon components */}
+                  {React.cloneElement(icon as any, { size: 20 })}
               </div>
               <div>
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white">{title}</h3>
