@@ -160,7 +160,7 @@ export const fetchCryptoNews = async (query?: string): Promise<AgentResponse> =>
 };
 
 export const generateImage = async (prompt: string, size: '1K' | '2K' | '4K'): Promise<string | null> => {
-  const apiKey = process.env.API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     console.error("API Key not found");
     return null;
@@ -199,7 +199,7 @@ export const generateImage = async (prompt: string, size: '1K' | '2K' | '4K'): P
 };
 
 export const summarizeText = async (text: string): Promise<string | null> => {
-  const apiKey = process.env.API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     console.error("API Key not found");
     return "Lỗi: Chưa cấu hình API Key.";
