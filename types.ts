@@ -1,6 +1,16 @@
 
 import React from 'react';
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  bio: string;
+  joinedDate: string;
+  rank: 'Newbie' | 'Explorer' | 'Pro' | 'Whale';
+}
+
 export interface Guide {
   id: string;
   title: string;
@@ -30,19 +40,21 @@ export interface Article {
 
 export interface CommunityReply {
   id: string;
-  author: string;
+  authorId: string;
+  authorName: string;
   content: string;
   timestamp: string;
 }
 
 export interface CommunityPost {
   id: string;
-  author: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar: string;
   content: string;
   timestamp: string;
   upvotes: number;
   tag: 'Kiến thức' | 'Hỏi đáp' | 'Kinh nghiệm';
-  avatarSeed: string;
   replies: CommunityReply[];
 }
 
@@ -52,25 +64,23 @@ export interface NavItem {
   icon?: React.ReactNode;
 }
 
-export interface MarketData {
-  name: string;
-  value: number;
-  color: string;
+export interface ChatMessage {
+  role: 'user' | 'model';
+  parts: { text: string }[];
 }
 
+// Added missing NewsItem interface
 export interface NewsItem {
   title: string;
   summary: string;
   source: string;
   time: string;
+  url: string;
+  sentiment: string;
 }
 
+// Added missing AgentResponse interface
 export interface AgentResponse {
   news: NewsItem[];
   sources: { title: string; uri: string }[];
-}
-
-export interface ChatMessage {
-  role: 'user' | 'model';
-  parts: { text: string }[];
 }

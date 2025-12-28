@@ -15,8 +15,11 @@ import HelpCenter from './pages/HelpCenter';
 import Terms from './pages/Terms'; 
 import Privacy from './pages/Privacy'; 
 import News from './pages/News';
+import Auth from './pages/Auth';
+import Profile from './pages/Profile';
 import AIChatWidget from './components/AIChatWidget';
 import { SettingsProvider } from './context/SettingsContext';
+import { AuthProvider } from './context/AuthContext';
 
 const AppContent: React.FC = () => {
   return (
@@ -36,6 +39,8 @@ const AppContent: React.FC = () => {
             <Route path="/help" element={<HelpCenter />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
         <CryptoTicker />
@@ -49,7 +54,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <SettingsProvider>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </SettingsProvider>
   );
 }

@@ -17,6 +17,13 @@ const translations = {
     searchCmd: 'Tìm kiếm',
     noResults: 'Không có kết quả cho',
     
+    // Auth & Profile
+    login: 'Đăng nhập',
+    register: 'Đăng ký',
+    profile: 'Hồ sơ cá nhân',
+    logout: 'Đăng xuất',
+    welcomeBack: 'Chào mừng trở lại!',
+    
     // News
     newsTitle: 'Tin tức & Xu hướng',
     searchNewsPlaceholder: 'Tìm tin tức (VD: Bitcoin, Ethereum...)',
