@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Github, Twitter, Facebook } from 'lucide-react';
+import { Twitter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import { useSettings } from '../context/SettingsContext';
@@ -20,9 +20,16 @@ const Footer: React.FC = () => {
               {t('footerDesc')}
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-white transition"><Twitter size={20} /></a>
-              <a href="#" className="text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-white transition"><Facebook size={20} /></a>
-              <a href="#" className="text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-white transition"><Github size={20} /></a>
+              <a 
+                href="https://x.com/Crypto_2U" 
+                target="_blank" 
+                rel="noreferrer" 
+                title="Theo dõi Crypto2u trên X"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all border border-slate-200 dark:border-slate-800"
+              >
+                {/* Clean X icon representation */}
+                <Twitter size={20} className="fill-current" />
+              </a>
             </div>
           </div>
 
@@ -53,7 +60,7 @@ const Footer: React.FC = () => {
         </div>
         
         <div className="border-t border-slate-200 dark:border-slate-800 pt-8 text-center text-sm text-slate-500 dark:text-slate-600">
-          &copy; {new Date().getFullYear()} Crypto2u. {t('rights')}
+          &copy; {new Date().getFullYear()} Crypto2u Academy. {t('rights')}
         </div>
       </div>
     </footer>

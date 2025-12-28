@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { Article } from '../types';
 
@@ -17,7 +16,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Beginner",
-        views: 1850,
+        views: 0,
         date: "06/12/2025",
         content: (
             <article className="prose prose-lg md:prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -79,7 +78,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1620321023374-d1a68fbc720d?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Beginner",
-        views: 2101,
+        views: 0,
         date: "10/12/2025",
         content: (
             <article className="prose prose-lg md:prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -116,7 +115,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1640340434855-6084b1f4901c?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Beginner",
-        views: 1120,
+        views: 0,
         date: "21/12/2025",
         content: (
              <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -140,7 +139,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1621501103258-0e060c213799?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Beginner",
-        views: 2600,
+        views: 0,
         date: "24/12/2025",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -161,7 +160,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1555421689-d68471e189f2?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Beginner",
-        views: 850,
+        views: 0,
         date: "27/12/2025",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -183,7 +182,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1611974765270-ca1258634369?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Beginner",
-        views: 600,
+        views: 0,
         date: "30/12/2025",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -204,7 +203,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Beginner",
-        views: 520,
+        views: 0,
         date: "04/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -229,7 +228,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Intermediate",
-        views: 650,
+        views: 0,
         date: "10/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -326,7 +325,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1558494949-efc52728101c?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Intermediate",
-        views: 580,
+        views: 0,
         date: "14/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -401,20 +400,7 @@ export const articlesVi: Article[] = [
                     <li><strong>Lending & Borrowing:</strong> Oracle cung cấp giá token chính xác → tránh thanh lý nhầm (Ví dụ: Aave, Compound sử dụng Chainlink).</li>
                     <li><strong>DEX & AMM:</strong> Oracle giúp cập nhật giá trên các sàn phi tập trung, tránh arbitrage hoặc gian lận giá.</li>
                     <li><strong>Derivatives & Prediction Market:</strong> Dự đoán sự kiện, kết quả thể thao, thị trường tương lai. Oracle xác nhận kết quả để smart contract thanh toán.</li>
-                    <li><strong>Insurance & NFT:</strong> Bảo hiểm nông nghiệp (dữ liệu thời tiết), NFT động (dữ liệu thực tế ảnh hưởng hình dạng, rarity).</li>
                 </ul>
-
-                <h2 className="text-3xl font-bold mt-10 mb-6 text-slate-900 dark:text-white">6. Rủi ro của Oracle</h2>
-                <ul className="list-disc pl-6 mb-6">
-                    <li><strong>Oracle manipulation (tấn công Oracle):</strong> Hack hoặc thao túng dữ liệu → smart contract thực hiện sai.</li>
-                    <li><strong>Single point of failure:</strong> Oracle tập trung → dễ bị lỗi, downtime.</li>
-                    <li><strong>Chi phí & tốc độ:</strong> Oracle phi tập trung → phí cao hơn, tốc độ cập nhật chậm hơn.</li>
-                </ul>
-                <p><strong>Lời khuyên:</strong> Chọn decentralized oracle uy tín (Chainlink, Band Protocol). Kiểm tra cách Oracle cập nhật dữ liệu và bảo mật smart contract.</p>
-
-                <h2 className="text-3xl font-bold mt-10 mb-6 text-slate-900 dark:text-white">7. Kết luận</h2>
-                <p>Oracle là “cầu nối” không thể thiếu cho blockchain và DeFi: Cung cấp dữ liệu ngoài blockchain chính xác, minh bạch; Giúp smart contract thực thi chính xác và an toàn; Mở ra cơ hội ứng dụng DeFi đa dạng.</p>
-                <p>Tóm lại: Nếu DeFi là “ngôi nhà thông minh”, Oracle chính là cảm biến và nguồn dữ liệu để mọi quyết định diễn ra tự động, đúng và công bằng.</p>
             </article>
         )
     },
@@ -425,7 +411,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Intermediate",
-        views: 720,
+        views: 0,
         date: "15/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -513,7 +499,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1605792657660-596af9009e82?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Intermediate",
-        views: 1450,
+        views: 0,
         date: "22/12/2025",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -534,7 +520,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1642543492481-44e81e3914a7?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Intermediate",
-        views: 2300,
+        views: 0,
         date: "23/12/2025",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -551,7 +537,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1611974765270-ca1258634369?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Intermediate",
-        views: 890,
+        views: 0,
         date: "05/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -568,7 +554,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Intermediate",
-        views: 1650,
+        views: 0,
         date: "12/12/2025",
         content: (
              <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -589,7 +575,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1621761191319-c6fb62004040?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Intermediate",
-        views: 1050,
+        views: 0,
         date: "28/12/2025",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -609,7 +595,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1644361566696-3d442b5b482a?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Intermediate",
-        views: 750,
+        views: 0,
         date: "31/12/2025",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -626,7 +612,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1651055532297-f01e8557b42d?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Intermediate",
-        views: 1320,
+        views: 0,
         date: "01/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -647,7 +633,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1622790698141-94e30457ef12?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Advanced",
-        views: 1350,
+        views: 0,
         date: "15/12/2025",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -664,7 +650,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Advanced",
-        views: 920,
+        views: 0,
         date: "29/12/2025",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -681,7 +667,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1543286386-713df548e9cc?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Advanced",
-        views: 1540,
+        views: 0,
         date: "02/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -698,7 +684,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1526304640152-d4619684e484?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Advanced",
-        views: 680,
+        views: 0,
         date: "03/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -715,7 +701,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1621504450162-e152967197f9?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Advanced",
-        views: 740,
+        views: 0,
         date: "06/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -732,7 +718,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1639322537504-6427a16b0a28?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Advanced",
-        views: 650,
+        views: 0,
         date: "07/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -749,7 +735,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1620641788421-7f1c33dae662?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Advanced",
-        views: 890,
+        views: 0,
         date: "11/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -789,7 +775,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1611974765270-ca1258634369?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Advanced",
-        views: 1100,
+        views: 0,
         date: "12/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -831,7 +817,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1565514020176-dbf2277cc168?q=80&w=2000&auto=format&fit=crop",
         category: "huong-dan",
         level: "Advanced",
-        views: 980,
+        views: 0,
         date: "13/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -878,7 +864,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1639322537228-ad7127ef94f4?q=80&w=2000&auto=format&fit=crop",
         category: "nghien-cuu",
         level: "Intermediate",
-        views: 1200,
+        views: 0,
         date: "20/12/2025",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -1001,7 +987,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1518546305927-5a420994e741?q=80&w=2000&auto=format&fit=crop",
         category: "nghien-cuu",
         level: "Beginner",
-        views: 2200,
+        views: 0,
         date: "05/12/2025",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -1022,7 +1008,6 @@ export const articlesVi: Article[] = [
                     <li><strong>Bitcoin & các đồng tiền lớn (Store of Value):</strong> Dùng để lưu trữ giá trị, tương tự “vàng kỹ thuật số”.</li>
                     <li><strong>Altcoin & Smart Contract Platform:</strong> Ethereum, Solana, Cardano, Avalanche… Hỗ trợ ứng dụng phi tập trung (DApp), DeFi, NFT.</li>
                     <li><strong>Stablecoin:</strong> Giá cố định với đồng tiền pháp định (USD, EUR…).</li>
-                    <li><strong>Token Utility & Governance:</strong> Token trong dự án DeFi, NFT để thanh toán, quản trị, staking.</li>
                 </ul>
 
                 <h2 className="text-3xl font-bold mt-10 mb-6 text-slate-900 dark:text-white">3. Vì sao thế giới dùng crypto?</h2>
@@ -1030,8 +1015,6 @@ export const articlesVi: Article[] = [
                     <li><strong>Phi tập trung – Không bị kiểm soát:</strong> Không ai có quyền đóng băng hay tịch thu tài sản.</li>
                     <li><strong>Giao dịch nhanh và toàn cầu:</strong> Chuyển tiền quốc tế nhanh, chi phí thấp hơn ngân hàng truyền thống.</li>
                     <li><strong>Bảo mật và minh bạch:</strong> Blockchain ghi nhận mọi giao dịch công khai, không thể sửa đổi.</li>
-                    <li><strong>Cơ hội đầu tư & tài chính:</strong> DeFi, staking, yield farming cho phép kiếm thu nhập thụ động.</li>
-                    <li><strong>Tạo nền tảng cho Web3 & NFT:</strong> Xây dựng hệ sinh thái Web3 phi tập trung, quyền sở hữu dữ liệu thuộc về người dùng.</li>
                 </ol>
 
                 <h2 className="text-3xl font-bold mt-10 mb-6 text-slate-900 dark:text-white">4. Rủi ro khi tham gia crypto</h2>
@@ -1057,7 +1040,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=2000&auto=format&fit=crop",
         category: "nghien-cuu",
         level: "Advanced",
-        views: 950,
+        views: 0,
         date: "25/12/2025",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -1107,7 +1090,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=2000&auto=format&fit=crop",
         category: "nghien-cuu",
         level: "Advanced",
-        views: 1100,
+        views: 0,
         date: "26/12/2025",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -1125,8 +1108,6 @@ export const articlesVi: Article[] = [
                     <li><strong>Dự đoán giá & phân tích thị trường:</strong> AI phân tích hàng triệu dữ liệu on-chain và off-chain.</li>
                     <li><strong>Quản lý danh mục tự động:</strong> Robo-advisor trên blockchain, AI rebalancing, staking tối ưu.</li>
                     <li><strong>An ninh & chống gian lận:</strong> AI phát hiện mempool manipulation, rug pull, phishing.</li>
-                    <li><strong>Tạo token & NFT thông minh:</strong> AI tạo NFT độc đáo, dự đoán giá NFT tăng.</li>
-                    <li><strong>AI Agent & Chatbot trong Web3:</strong> AI agent tự động quản lý ví, theo dõi giá.</li>
                 </ol>
 
                 <h2 className="text-3xl font-bold mt-10 mb-6 text-slate-900 dark:text-white">3. Ứng dụng Crypto trong AI</h2>
@@ -1147,7 +1128,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?q=80&w=2000&auto=format&fit=crop",
         category: "nghien-cuu",
         level: "Intermediate",
-        views: 880,
+        views: 0,
         date: "08/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">
@@ -1164,7 +1145,6 @@ export const articlesVi: Article[] = [
                     <li><strong>Kiếm token & NFT:</strong> Chiến đấu, hoàn thành nhiệm vụ, chơi PvP.</li>
                     <li><strong>Giao dịch NFT:</strong> NFT hiếm → bán trên marketplace.</li>
                     <li><strong>Staking & Yield:</strong> Staking token trong game để nhận lợi nhuận thụ động.</li>
-                    <li><strong>Tham gia guild:</strong> Guild kết nối người chơi → chia sẻ lợi nhuận.</li>
                 </ul>
 
                 <h2 className="text-3xl font-bold mt-10 mb-6 text-slate-900 dark:text-white">4. Rủi ro cần lưu ý</h2>
@@ -1182,7 +1162,7 @@ export const articlesVi: Article[] = [
         image: "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?q=80&w=2000&auto=format&fit=crop",
         category: "nghien-cuu",
         level: "Advanced",
-        views: 1250,
+        views: 0,
         date: "16/01/2026",
         content: (
             <article className="prose prose-xl dark:prose-invert max-w-none text-slate-800 dark:text-slate-300">

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowRight, Shield, Zap, Globe, TrendingUp, Layers } from 'lucide-react';
+import { ArrowRight, Shield, Zap, Globe, TrendingUp, Layers, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { useSettings } from '../context/SettingsContext';
@@ -11,6 +11,10 @@ const Home: React.FC = () => {
 
   const featuredArticles = articles.filter(a => a.category === 'nghien-cuu').slice(0, 2);
   const latestArticles = articles.slice(0, 5);
+
+  const getLikes = (slug: string) => {
+    return localStorage.getItem(`crypto2u_likes_${slug}`) || '0';
+  };
 
   return (
     <div className="min-h-screen pt-24">
@@ -60,8 +64,11 @@ const Home: React.FC = () => {
                   <div className="grid md:grid-cols-2 gap-6">
                      {featuredArticles.map((a, i) => (
                         <Link to={`/article/${a.slug}`} key={i} className="group card overflow-hidden">
-                           <div className="aspect-video overflow-hidden bg-slate-200">
+                           <div className="aspect-video overflow-hidden bg-slate-200 relative">
                               <img src={a.image} alt={a.title} className="w-full h-full object-cover transition duration-500 group-hover:scale-105" />
+                              <div className="absolute top-2 right-2 flex items-center gap-1 bg-white/80 dark:bg-slate-900/80 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-pink-500">
+                                <Heart size={10} className="fill-pink-500" /> {getLikes(a.slug)}
+                              </div>
                            </div>
                            <div className="p-5">
                               <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2 group-hover:text-indigo-600 transition">{a.title}</h3>
@@ -83,9 +90,14 @@ const Home: React.FC = () => {
                            <div className="w-24 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-slate-200">
                               <img src={a.image} alt={a.title} className="w-full h-full object-cover" />
                            </div>
-                           <div className="min-w-0">
+                           <div className="min-w-0 flex-1">
                               <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 transition">{a.title}</h3>
-                              <p className="text-[10px] text-slate-500 mt-1">{a.date} • {a.views} {t('views')}</p>
+                              <div className="flex items-center gap-3 mt-1">
+                                <p className="text-[10px] text-slate-500">{a.date} • {a.views} {t('views')}</p>
+                                <span className="text-[10px] text-pink-500 font-bold flex items-center gap-0.5">
+                                  <Heart size={10} className="fill-pink-500" /> {getLikes(a.slug)}
+                                </span>
+                              </div>
                            </div>
                         </Link>
                      ))}

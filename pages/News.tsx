@@ -1,7 +1,7 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { RefreshCw, Clock, Globe, Search, ShieldCheck, Zap, ExternalLink, ArrowRight, TrendingUp, TrendingDown, Minus, Search as SearchIcon, AlertCircle, Cpu } from 'lucide-react';
+import { RefreshCw, Clock, Globe, Search as SearchIcon, ExternalLink, ArrowRight, TrendingUp, TrendingDown, Minus, History, Trash2, Cpu } from 'lucide-react';
 import { fetchCryptoNews } from '../services/geminiService';
 import { useSettings } from '../context/SettingsContext';
 
@@ -12,13 +12,32 @@ const News: React.FC = () => {
   const [news, setNews] = useState<any[]>([]);
   const [sources, setSources] = useState<{title: string, uri: string}[]>([]);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState('Standby');
+  const [status, setStatus] = useState('Sẵn sàng');
   const [inputValue, setInputValue] = useState(query);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const { t } = useSettings();
+
+  // Load history from localStorage
+  useEffect(() => {
+    const savedHistory = JSON.parse(localStorage.getItem('crypto2u_search_history') || '[]');
+    setSearchHistory(savedHistory);
+  }, []);
+
+  const saveToHistory = (q: string) => {
+    if (!q.trim()) return;
+    const newHistory = [q, ...searchHistory.filter(h => h !== q)].slice(0, 5);
+    setSearchHistory(newHistory);
+    localStorage.setItem('crypto2u_search_history', JSON.stringify(newHistory));
+  };
+
+  const clearHistory = () => {
+    setSearchHistory([]);
+    localStorage.removeItem('crypto2u_search_history');
+  };
 
   const loadNews = async (searchQuery?: string) => {
     setLoading(true);
-    setStatus(searchQuery ? `Đang truy vấn dữ liệu cho "${searchQuery}"...` : 'Đang quét tin tức Crypto...');
+    setStatus(searchQuery ? `Crypto2u AI đang quét dữ liệu cho "${searchQuery}"...` : 'Đang tổng hợp tin tức từ Crypto2u AI...');
     
     try {
         const data = await fetchCryptoNews(searchQuery);
@@ -26,14 +45,14 @@ const News: React.FC = () => {
         if (data.news && data.news.length > 0) {
             setNews(data.news);
             setSources(data.sources || []);
-            setStatus('Dữ liệu đã sẵn sàng');
+            setStatus('Cập nhật thành công');
         } else {
-            setStatus('Chủ đề không thuộc lĩnh vực Crypto');
+            setStatus('Không có kết quả');
             setNews([]);
             setSources([]);
         }
     } catch (err: any) {
-        setStatus('Lỗi xử lý Agent');
+        setStatus('Lỗi kết nối AI');
     } finally {
         setLoading(false);
     }
@@ -47,6 +66,7 @@ const News: React.FC = () => {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputValue.trim()) {
+      saveToHistory(inputValue);
       setSearchParams({ q: inputValue });
     } else {
       setSearchParams({});
@@ -73,15 +93,15 @@ const News: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-8">
             <div className="text-center md:text-left">
                 <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                    <div className="w-12 h-12 bg-slate-900 dark:bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
                         <Cpu className={`text-white ${loading ? 'animate-spin' : ''}`} size={28} />
                     </div>
                     <h1 className="text-4xl md:text-5xl font-display font-bold text-slate-900 dark:text-white">
-                        Crypto <span className="gradient-text">Search Agent</span>
+                        Crypto2u <span className="gradient-text">AI News Agent</span>
                     </h1>
                 </div>
                 <p className="text-slate-500 dark:text-slate-400 max-w-lg">
-                    Agent thông minh chuyên biệt lĩnh vực Blockchain. Hỗ trợ tìm kiếm từ khóa, dự án (Monad, Berachain...) và phân tích sắc thái tin tức.
+                    Hệ thống truy vấn tin tức thông minh do Crypto2u phát triển. Tổng hợp từ các nguồn tin quốc tế và phân tích bằng trí tuệ nhân tạo.
                 </p>
             </div>
 
@@ -110,7 +130,7 @@ const News: React.FC = () => {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     type="text" 
-                    placeholder="Nhập tên dự án hoặc từ khóa (VD: Monad, Berachain, Bitcoin...)"
+                    placeholder="Nhập điều bạn cần tìm kiếm tin tức vào..."
                     className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl py-5 pl-14 pr-14 shadow-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-lg text-slate-900 dark:text-white transition-all"
                 />
                 <SearchIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={24} />
@@ -118,86 +138,74 @@ const News: React.FC = () => {
                     <ArrowRight size={20} />
                 </button>
             </form>
-            <div className="flex flex-wrap gap-2 mt-4">
-                <span className="text-[10px] text-slate-400 flex items-center gap-1">Gợi ý:</span>
-                {['Monad', 'Berachain', 'LayerZero', 'ZkSync'].map(tag => (
-                    <button 
-                        key={tag}
-                        onClick={() => { setInputValue(tag); setSearchParams({ q: tag }); }}
-                        className="text-[10px] px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/40 hover:text-indigo-600 transition"
-                    >
-                        {tag}
-                    </button>
-                ))}
-            </div>
+            
+            {searchHistory.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 mt-4">
+                  <span className="text-[10px] text-slate-400 flex items-center gap-1 uppercase font-bold">
+                    <History size={10} /> Lịch sử tìm kiếm:
+                  </span>
+                  {searchHistory.map((tag, idx) => (
+                      <button 
+                          key={idx}
+                          onClick={() => { setInputValue(tag); setSearchParams({ q: tag }); }}
+                          className="text-[10px] px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/40 hover:text-indigo-600 transition border border-slate-200 dark:border-slate-700"
+                      >
+                          {tag}
+                      </button>
+                  ))}
+                  <button onClick={clearHistory} className="p-1 text-slate-400 hover:text-red-500 transition ml-2">
+                    <Trash2 size={12} />
+                  </button>
+              </div>
+            )}
         </div>
 
         {/* News Grid */}
         {loading && news.length === 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[1,2,3,4,5,6].map(i => (
+                {[1,2,3,4,5,6,7,8,9,10].map(i => (
                     <div key={i} className="card h-64 animate-pulse bg-slate-200 dark:bg-slate-800 border-none"></div>
                 ))}
             </div>
         ) : (
-            <>
-                {news.length > 0 ? (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {news.map((item, idx) => (
-                            <div key={idx} className="card p-6 flex flex-col group hover:scale-[1.01] transition-transform">
-                                <div className="flex justify-between items-start mb-4">
-                                    <span className="flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest truncate max-w-[70%]">
-                                        <Globe size={12} /> {item.source}
-                                    </span>
-                                    <span className={`flex items-center gap-1 px-2 py-0.5 rounded border text-[9px] font-bold ${getSentimentStyle(item.sentiment)}`}>
-                                        {getSentimentIcon(item.sentiment)}
-                                        {item.sentiment}
-                                    </span>
-                                </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {news.map((item, idx) => (
+                    <div key={idx} className="card p-6 flex flex-col group hover:scale-[1.01] transition-transform">
+                        <div className="flex justify-between items-start mb-4">
+                            <span className="flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest truncate max-w-[70%]">
+                                <Globe size={12} /> {item.source}
+                            </span>
+                            <span className={`flex items-center gap-1 px-2 py-0.5 rounded border text-[9px] font-bold ${getSentimentStyle(item.sentiment)}`}>
+                                {getSentimentIcon(item.sentiment)}
+                                {item.sentiment}
+                            </span>
+                        </div>
 
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4 leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
-                                    {item.title}
-                                </h3>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4 leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+                            {item.title}
+                        </h3>
 
-                                <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 flex-1 line-clamp-4">
-                                    {item.summary}
-                                </p>
-
-                                <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
-                                    <div className="flex items-center gap-2 text-xs text-slate-400">
-                                        <Clock size={12} />
-                                        {item.time}
-                                    </div>
-                                    <a 
-                                        href={item.url} 
-                                        target="_blank" 
-                                        rel="noreferrer" 
-                                        className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
-                                    >
-                                        Nguồn tin <ExternalLink size={12} />
-                                    </a>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : !loading && (
-                    <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700">
-                        <SearchIcon size={48} className="mx-auto text-slate-300 mb-4" />
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Không tìm thấy kết quả phù hợp</h3>
-                        <p className="text-slate-500 max-w-md mx-auto mb-6">
-                            Từ khóa <b>"{query}"</b> không nằm trong phạm vi kiến thức Crypto hoặc không có tin tức mới liên quan.
+                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 flex-1 line-clamp-4">
+                            {item.summary}
                         </p>
-                        {query && (
-                             <button 
-                                onClick={() => { setInputValue(''); setSearchParams({}); }}
-                                className="px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition"
+
+                        <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
+                            <div className="flex items-center gap-2 text-xs text-slate-400">
+                                <Clock size={12} />
+                                {item.time}
+                            </div>
+                            <a 
+                                href={item.url} 
+                                target="_blank" 
+                                rel="noreferrer" 
+                                className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
                             >
-                                Xem tin tức tổng hợp
-                            </button>
-                        )}
+                                Đọc tin gốc <ExternalLink size={12} />
+                            </a>
+                        </div>
                     </div>
-                )}
-            </>
+                ))}
+            </div>
         )}
       </div>
     </div>

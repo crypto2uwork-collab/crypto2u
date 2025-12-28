@@ -13,7 +13,7 @@ const getAIClient = () => {
 };
 
 /**
- * AI NEWS AGENT: Thông minh hơn trong việc nhận diện dự án Crypto
+ * AI NEWS AGENT: Tối ưu cho thương hiệu Crypto2u
  */
 export const fetchCryptoNews = async (query?: string): Promise<AgentResponse & { isFallback?: boolean }> => {
   const ai = getAIClient();
@@ -21,17 +21,15 @@ export const fetchCryptoNews = async (query?: string): Promise<AgentResponse & {
 
   try {
     if (query && query.trim() !== "" && query !== "ALL") {
-      // Prompt được tinh chỉnh để nhận diện cả các dự án mới nổi (Monad, Berachain, etc.)
-      const searchPrompt = `Bạn là một chuyên gia phân tích thị trường Crypto toàn cầu.
-      NHIỆM VỤ: Tìm kiếm và tóm tắt 5-8 tin tức mới nhất về: "${query}".
+      const searchPrompt = `Bạn là Crypto2u AI News Agent - hệ thống phân tích tin tức độc quyền của Crypto2u.
+      NHIỆM VỤ: Tìm kiếm, tóm tắt và phân tích sắc thái của 10-12 tin tức mới nhất về: "${query}".
       
-      QUY TẮC NHẬN DIỆN LĨNH VỰC:
-      1. Chấp nhận các từ khóa liên quan đến: Bitcoin, Altcoins, DeFi, NFT, Layer 1/2/3, Web3, Blockchain, Mining, GameFi, và TẤT CẢ các tên dự án blockchain mới (ví dụ: Monad, Berachain, Celestia, Movement, etc.).
-      2. Nếu từ khóa là một dự án công nghệ blockchain hoặc tài chính số, hãy coi đó là HỢP LỆ.
-      3. Chỉ từ chối các chủ đề hoàn toàn không liên quan (ví dụ: "cách nấu ăn", "thời trang trẻ em", "bóng đá thế giới").
+      QUY TẮC:
+      1. Tập trung vào các dự án Blockchain, DeFi, NFT, Layer 1/2 và các dự án mới (Monad, Berachain...).
+      2. Nếu là dự án công nghệ blockchain hoặc tài chính số, hãy coi đó là HỢP LỆ.
       
       YÊU CẦU ĐẦU RA:
-      - Liệt kê các tin tức theo định dạng: [Tiêu đề]: [Tóm tắt ngắn gọn].
+      - Liệt kê tối đa 10-12 tin tức theo định dạng: [Tiêu đề]: [Tóm tắt ngắn gọn].
       - Phân tích sắc thái (Sentiment): Tích cực, Tiêu cực hoặc Trung lập.
       - Ngôn ngữ: Tiếng Việt.`;
 
@@ -40,29 +38,27 @@ export const fetchCryptoNews = async (query?: string): Promise<AgentResponse & {
         contents: searchPrompt,
         config: { 
           tools: [{ googleSearch: {} }],
-          temperature: 0.2 // Tăng nhẹ độ sáng tạo để AI linh hoạt hơn trong nhận diện
+          temperature: 0.2
         },
       });
 
       const rawText = response.text || "";
       const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
       
-      // Nếu không có nguồn dẫn hoặc kết quả quá sơ sài, AI có thể đã từ chối hoặc không tìm thấy
       if (groundingChunks.length === 0 && rawText.length < 100) {
         return { news: [], sources: [], isFallback: false };
       }
 
-      // Tách dòng tin tức thông minh hơn
       const newsLines = rawText.split('\n')
         .map(line => line.trim())
         .filter(line => line.length > 30 && (line.includes(':') || line.includes('-')));
 
       const sources = groundingChunks.map((chunk: any) => ({
-        title: chunk.web?.title || "Nguồn tin thị trường",
+        title: chunk.web?.title || "Nguồn tin Crypto2u",
         uri: chunk.web?.uri || "#"
       }));
 
-      const news = newsLines.slice(0, 8).map((line, index) => {
+      const news = newsLines.slice(0, 12).map((line, index) => {
         const parts = line.split(':');
         const title = parts[0]?.replace(/^(\d+\.|\*|-)\s*/, '').trim() || "Cập nhật thị trường";
         const summary = parts.slice(1).join(':').trim() || line;
@@ -70,8 +66,8 @@ export const fetchCryptoNews = async (query?: string): Promise<AgentResponse & {
         return {
           title: title,
           summary: summary,
-          source: sources[index]?.title || "Crypto Analytics",
-          time: "Mới cập nhật",
+          source: sources[index]?.title || "Crypto2u Analytics",
+          time: "Vừa cập nhật",
           sentiment: line.toLowerCase().includes("tích cực") ? "Tích cực" : 
                      line.toLowerCase().includes("tiêu cực") ? "Tiêu cực" : "Trung lập",
           url: sources[index]?.uri || "#"
@@ -81,11 +77,11 @@ export const fetchCryptoNews = async (query?: string): Promise<AgentResponse & {
       return { news, sources, isFallback: news.length === 0 };
     }
 
-    // FALLBACK: Tin tức tổng hợp nếu không có query
+    // FALLBACK
     const rawData = await fetchNewsFallbackRaw("ALL");
     if (!rawData || rawData.length === 0) return { news: [], sources: [], isFallback: true };
 
-    const agentPrompt = `Tóm tắt các tin tức crypto sau sang tiếng Việt chuyên nghiệp: ${JSON.stringify(rawData)}.`;
+    const agentPrompt = `Bạn là Crypto2u AI. Hãy tóm tắt 10 tin tức crypto sau sang tiếng Việt chuyên nghiệp: ${JSON.stringify(rawData)}.`;
 
     const response = await ai.models.generateContent({
       model: model,
@@ -123,7 +119,6 @@ export const fetchCryptoNews = async (query?: string): Promise<AgentResponse & {
     };
 
   } catch (error: any) {
-    console.error("News Agent Error:", error);
     return { news: [], sources: [], isFallback: true };
   }
 };
@@ -133,10 +128,10 @@ export const askCryptoTutor = async (currentMessage: string, history: ChatMessag
     const ai = getAIClient();
     const chat = ai.chats.create({
       model: "gemini-3-flash-preview",
-      config: { systemInstruction: "Bạn là chuyên gia Crypto2u. Trả lời các câu hỏi về crypto, blockchain, airdrop, và các dự án mới (như Monad, Berachain). Nếu người dùng hỏi ngoài ngành, hãy lịch sự từ chối." }
+      config: { systemInstruction: "Bạn là Crypto2u AI - Chuyên gia hỗ trợ kiến thức tiền điện tử. Trả lời các câu hỏi về crypto, blockchain, airdrop. Phong cách thân thiện, chính xác, khách quan." }
     });
     const response = await chat.sendMessage({ message: currentMessage });
-    return response.text || "Tôi gặp sự cố xử lý.";
+    return response.text || "Xin lỗi, tôi gặp sự cố nhỏ.";
   } catch (error) { return "Bot đang bận."; }
 };
 
@@ -145,7 +140,7 @@ export const summarizeText = async (text: string): Promise<string | null> => {
     const ai = getAIClient();
     const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `Tóm tắt nội dung crypto sau bằng tiếng Việt: ${text}`
+        contents: `Bạn là trợ lý Crypto2u. Tóm tắt nội dung crypto sau bằng tiếng Việt: ${text}`
     });
     return response.text || null;
   } catch (e) { return null; }
@@ -156,7 +151,7 @@ export const generateImage = async (prompt: string, size: '1K' | '2K' | '4K' = '
     const ai = getAIClient();
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-image-preview',
-      contents: { parts: [{ text: `A professional crypto technology illustration: ${prompt}` }] },
+      contents: { parts: [{ text: `A professional Crypto2u tech illustration: ${prompt}` }] },
       config: { imageConfig: { aspectRatio: "1:1", imageSize: size } },
     });
     if (response.candidates?.[0]?.content?.parts) {

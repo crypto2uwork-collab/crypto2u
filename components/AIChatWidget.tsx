@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, Loader2, Cpu } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, Loader2, Cpu, Sparkles } from 'lucide-react';
 import { askCryptoTutor } from '../services/geminiService';
 import { askHuggingFace } from '../services/hfService';
 import { ChatMessage } from '../types';
@@ -8,7 +8,7 @@ import { ChatMessage } from '../types';
 const AIChatWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [displayMessages, setDisplayMessages] = useState<{role: 'user' | 'model', text: string}[]>([
-    { role: 'model', text: 'Chào bạn! Mình là AI Agent từ cộng đồng mã nguồn mở (Hugging Face). Bạn muốn tìm hiểu gì về thị trường Crypto hôm nay?' }
+    { role: 'model', text: 'Chào bạn! Mình là Crypto2u AI. Bạn cần hỗ trợ gì về kiến thức hay tin tức thị trường hôm nay không?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -29,19 +29,11 @@ const AIChatWidget: React.FC = () => {
     setInput('');
     setIsLoading(true);
 
-    // 1. Cập nhật UI tin nhắn người dùng
     setDisplayMessages(prev => [...prev, { role: 'user', text: userText }]);
 
-    // 2. Gọi AI Agent từ Hugging Face
-    let responseText = await askHuggingFace(userText);
+    // Tận dụng Crypto2u AI (Gemini) làm ưu tiên chính
+    let responseText = await askCryptoTutor(userText);
     
-    // Nếu HF bị lỗi hoặc giới hạn (Rate limit), tự động fallback về Gemini để đảm bảo trải nghiệm
-    if (responseText.includes("Sự cố") || responseText.includes("xác thực")) {
-        console.log("Switching to Gemini Fallback...");
-        responseText = await askCryptoTutor(userText);
-    }
-    
-    // 3. Cập nhật phản hồi từ Agent
     setDisplayMessages(prev => [...prev, { role: 'model', text: responseText }]);
     setIsLoading(false);
   };
@@ -51,14 +43,14 @@ const AIChatWidget: React.FC = () => {
       {isOpen && (
         <div className="glass-panel w-80 sm:w-96 h-[450px] sm:h-[500px] mb-4 rounded-2xl flex flex-col shadow-2xl overflow-hidden animate-fade-in transition-all duration-300 transform origin-bottom-right bg-white dark:bg-slate-900 border-indigo-500/30">
           {/* Header */}
-          <div className="bg-gradient-to-r from-slate-800 to-slate-900 p-4 flex justify-between items-center border-b border-slate-700">
+          <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 p-4 flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-indigo-500 rounded-lg">
-                <Cpu className="w-4 h-4 text-white" />
+              <div className="p-1.5 bg-white/20 rounded-lg">
+                <Sparkles className="w-4 h-4 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-white text-sm font-display leading-tight">HF AI Agent</h3>
-                <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-widest">Open Source Model</span>
+                <h3 className="font-bold text-white text-sm font-display leading-tight">Crypto2u AI</h3>
+                <span className="text-[9px] text-indigo-200 font-bold uppercase tracking-widest">Trợ lý kiến thức 24/7</span>
               </div>
             </div>
             <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white transition">
@@ -71,8 +63,8 @@ const AIChatWidget: React.FC = () => {
             {displayMessages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {msg.role === 'model' && (
-                  <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center mr-2 flex-shrink-0 border border-slate-700">
-                    <Cpu size={14} className="text-indigo-400" />
+                  <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center mr-2 flex-shrink-0">
+                    <Bot size={14} className="text-white" />
                   </div>
                 )}
                 <div className={`max-w-[80%] p-3 rounded-xl text-sm leading-relaxed ${
@@ -86,11 +78,11 @@ const AIChatWidget: React.FC = () => {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                 <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center mr-2 flex-shrink-0">
-                    <Loader2 size={14} className="text-indigo-400 animate-spin" />
+                 <div className="w-8 h-8 rounded-full bg-indigo-600/50 flex items-center justify-center mr-2 flex-shrink-0">
+                    <Loader2 size={14} className="text-white animate-spin" />
                   </div>
                 <div className="bg-white dark:bg-slate-800 p-3 rounded-xl rounded-bl-none flex items-center gap-2 border border-slate-200 dark:border-slate-700">
-                  <span className="text-xs text-slate-500 animate-pulse font-medium">Agent đang xử lý...</span>
+                  <span className="text-xs text-slate-500 animate-pulse font-medium">Đang suy nghĩ...</span>
                 </div>
               </div>
             )}
@@ -105,14 +97,14 @@ const AIChatWidget: React.FC = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Hỏi AI Agent..."
+                placeholder="Nhập câu hỏi của bạn..."
                 disabled={isLoading}
                 className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition disabled:opacity-50"
               />
               <button 
                 onClick={handleSend}
                 disabled={isLoading || !input.trim()}
-                className="p-2.5 bg-slate-900 dark:bg-indigo-600 hover:bg-black dark:hover:bg-indigo-700 rounded-xl text-white disabled:opacity-50 transition shadow-lg"
+                className="p-2.5 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-white disabled:opacity-50 transition shadow-lg"
               >
                 <Send size={18} />
               </button>
@@ -123,11 +115,11 @@ const AIChatWidget: React.FC = () => {
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center ${
-          isOpen ? 'bg-slate-800 text-white' : 'bg-slate-900 text-white border-2 border-indigo-500/20'
+        className={`p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center ${
+          isOpen ? 'bg-slate-800 text-white' : 'bg-indigo-600 text-white shadow-indigo-500/40'
         }`}
       >
-        {isOpen ? <X size={28} /> : <Cpu size={28} className="text-indigo-400" />}
+        {isOpen ? <X size={28} /> : <MessageCircle size={28} />}
       </button>
     </div>
   );

@@ -18,19 +18,19 @@ const About: React.FC = () => {
           </p>
         </div>
 
-        {/* Mission Section - Updated Background for better readability */}
-        <div className="card p-8 md:p-12 mb-16 relative overflow-hidden bg-slate-900 dark:bg-indigo-950 text-white border-none shadow-2xl">
-           <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] -z-10"></div>
-           <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] -z-10"></div>
+        {/* Mission Section - Brighter, modern background with white text */}
+        <div className="card p-8 md:p-12 mb-16 relative overflow-hidden bg-gradient-to-br from-indigo-600 to-indigo-800 text-white border-none shadow-2xl shadow-indigo-500/20">
+           <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[100px] -z-10"></div>
+           <div className="absolute bottom-0 left-0 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-[80px] -z-10"></div>
            
            <h2 className="text-3xl font-display font-bold mb-6 text-white">{t('missionTitle')}</h2>
            <div className="flex flex-col md:flex-row gap-10 items-center relative z-10">
-              <div className="flex-1 text-slate-100 text-lg leading-relaxed font-medium">
+              <div className="flex-1 text-indigo-50 text-lg leading-relaxed font-medium">
                  <p>{t('missionDesc')}</p>
               </div>
               <div className="md:w-1/3 flex justify-center">
-                 <div className="p-6 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20">
-                    <ShieldCheck className="w-20 h-20 text-indigo-400" />
+                 <div className="p-6 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 shadow-xl">
+                    <ShieldCheck className="w-20 h-20 text-white" />
                  </div>
               </div>
            </div>

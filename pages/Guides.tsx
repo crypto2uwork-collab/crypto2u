@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSettings } from '../context/SettingsContext';
-import { BookOpen, Layers, Zap } from 'lucide-react';
+import { BookOpen, Layers, Zap, Heart } from 'lucide-react';
 
 const Guides: React.FC = () => {
   const { t, getContent } = useSettings();
@@ -13,12 +13,15 @@ const Guides: React.FC = () => {
   const intermediateGuides = articles.filter(a => a.category === 'huong-dan' && a.level === 'Intermediate');
   const advancedGuides = articles.filter(a => a.category === 'huong-dan' && a.level === 'Advanced');
 
+  const getLikes = (slug: string) => {
+    return localStorage.getItem(`crypto2u_likes_${slug}`) || '0';
+  };
+
   const GuideSection = ({ title, desc, articles, icon, colorClass, borderClass }: any) => (
     <div className="mb-12">
        <div className={`card p-6 border-t-4 ${borderClass} mb-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900`}>
           <div className="flex items-center gap-4">
               <div className={`p-2.5 rounded-full bg-white dark:bg-slate-700 shadow-sm ${colorClass}`}>
-                  {/* Fixed: cast icon to any for cloneElement to safely add 'size' prop across all icon components */}
                   {React.cloneElement(icon as any, { size: 20 })}
               </div>
               <div>
@@ -31,8 +34,11 @@ const Guides: React.FC = () => {
        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {articles.map((guide: any, idx: number) => (
             <Link to={`/article/${guide.slug}`} key={idx} className="card p-5 hover:border-indigo-500 transition group flex flex-col h-full hover:shadow-lg hover:-translate-y-1 duration-300">
-              <div className="aspect-[16/10] w-full rounded-lg overflow-hidden mb-4 bg-slate-200 dark:bg-slate-700/50">
+              <div className="aspect-[16/10] w-full rounded-lg overflow-hidden mb-4 bg-slate-200 dark:bg-slate-700/50 relative">
                  <img src={guide.image} alt={guide.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                 <div className="absolute top-2 right-2 flex items-center gap-1 bg-white/80 dark:bg-slate-900/80 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-pink-500">
+                    <Heart size={10} className="fill-pink-500" /> {getLikes(guide.slug)}
+                 </div>
               </div>
               
               <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition leading-snug">
