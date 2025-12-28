@@ -1,12 +1,15 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
+import { supabase } from '../services/supabase';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, name: string) => void;
-  logout: () => void;
-  updateUser: (newData: Partial<User>) => void;
+  loading: boolean;
+  login: (email: string, pass: string) => Promise<void>;
+  signUp: (email: string, pass: string, name: string) => Promise<void>;
+  logout: () => Promise<void>;
+  updateUser: (newData: Partial<User>) => Promise<void>;
   isLoggedIn: boolean;
 }
 
@@ -14,42 +17,89 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProfile = async (id: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (data) {
+        setUser(data);
+      } else {
+        console.warn("Profile not found for user", id);
+        // Nếu trigger SQL chưa kịp chạy, có thể thử fetch lại sau vài giây
+      }
+    } catch (err) {
+      console.error("Error fetching profile:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('crypto2u_user_session');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    // Kiểm tra session hiện tại
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        fetchProfile(session.user.id);
+      } else {
+        setLoading(false);
+      }
+    });
+
+    // Theo dõi thay đổi trạng thái Auth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        fetchProfile(session.user.id);
+      } else {
+        setUser(null);
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = (email: string, name: string) => {
-    const newUser: User = {
-      id: Math.random().toString(36).substr(2, 9),
-      email,
-      name,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
-      bio: 'Chào mừng bạn đến với trang cá nhân của tôi!',
-      joinedDate: new Date().toLocaleDateString('vi-VN'),
-      rank: 'Newbie'
-    };
-    setUser(newUser);
-    localStorage.setItem('crypto2u_user_session', JSON.stringify(newUser));
+  const login = async (email: string, pass: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+    if (error) throw error;
   };
 
-  const logout = () => {
+  const signUp = async (email: string, pass: string, name: string) => {
+    // Quan trọng: Gửi name vào options.data để SQL Trigger có thể đọc được
+    const { error } = await supabase.auth.signUp({ 
+      email, 
+      password: pass,
+      options: {
+        data: {
+          name: name
+        }
+      }
+    });
+    if (error) throw error;
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem('crypto2u_user_session');
   };
 
-  const updateUser = (newData: Partial<User>) => {
+  const updateUser = async (newData: Partial<User>) => {
     if (!user) return;
-    const updatedUser = { ...user, ...newData };
-    setUser(updatedUser);
-    localStorage.setItem('crypto2u_user_session', JSON.stringify(updatedUser));
+    const { error } = await supabase
+      .from('profiles')
+      .update(newData)
+      .eq('id', user.id);
+    
+    if (error) throw error;
+    setUser({ ...user, ...newData });
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUser, isLoggedIn: !!user }}>
+    <AuthContext.Provider value={{ user, loading, login, signUp, logout, updateUser, isLoggedIn: !!user }}>
       {children}
     </AuthContext.Provider>
   );

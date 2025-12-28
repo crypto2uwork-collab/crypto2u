@@ -7,9 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Crypto2u - Khởi đầu hành trình Crypto</title>
     
-    <!-- Shim cho process.env để chạy được trên trình duyệt mà không cần bundler -->
     <script>
-      window.process = window.process || { env: { GEMINI_API_KEY: "" } };
+      window.process = window.process || { env: { API_KEY: "" } };
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -148,6 +147,7 @@
 {
   "imports": {
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.32.0",
+    "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/+esm",
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
     "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
     "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.10.1",
@@ -160,7 +160,6 @@
 </head>
   <body>
     <div id="root"></div>
-    <!-- Đảm bảo tệp entry point được nạp đúng cách dưới dạng module -->
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>
