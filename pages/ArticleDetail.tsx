@@ -1,75 +1,122 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, Eye, ArrowLeft, Twitter, Link as LinkIcon, Check, Share2, Heart } from 'lucide-react';
+import { Calendar, Eye, ArrowLeft, Twitter, Share2, Heart, Loader2 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { useSettings } from '../context/SettingsContext';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../services/supabase';
 
 const ArticleDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { getContent, t } = useSettings();
+  const { user, isLoggedIn, isConfigured } = useAuth();
   const { articles } = getContent();
   
   const article = articles.find(a => a.slug === slug);
-  const [copied, setCopied] = useState(false);
-  const [realtimeViews, setRealtimeViews] = useState(0);
-  const [likes, setLikes] = useState(0);
+  const [stats, setStats] = useState({ views: 0, likes: 0 });
   const [isLiked, setIsLiked] = useState(false);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [slug]);
 
-  // Real-time views & Likes simulation using localStorage
   useEffect(() => {
-    if (slug) {
-      const viewsKey = `crypto2u_views_${slug}`;
-      const likesKey = `crypto2u_likes_${slug}`;
-      const isLikedKey = `crypto2u_user_liked_${slug}`;
-      
-      // Views
-      const baseViews = article?.views || 0;
-      const extraViews = parseInt(localStorage.getItem(viewsKey) || '0');
-      const newExtraViews = extraViews + 1;
-      localStorage.setItem(viewsKey, newExtraViews.toString());
-      setRealtimeViews(baseViews + newExtraViews);
-
-      // Likes
-      const savedLikes = parseInt(localStorage.getItem(likesKey) || '0');
-      setLikes(savedLikes);
-      
-      // Check user liked
-      const userLiked = localStorage.getItem(isLikedKey) === 'true';
-      setIsLiked(userLiked);
-
-      // Simulate other people viewing (every 30s)
-      const interval = setInterval(() => {
-        setRealtimeViews(prev => prev + Math.floor(Math.random() * 2));
-      }, 30000);
-
-      return () => clearInterval(interval);
+    if (slug && isConfigured) {
+      initArticleStats();
     }
-  }, [slug, article]);
+  }, [slug, isConfigured, user]);
 
-  const handleLike = () => {
-    if (!slug) return;
-    const likesKey = `crypto2u_likes_${slug}`;
-    const isLikedKey = `crypto2u_user_liked_${slug}`;
-    
-    if (isLiked) {
-      const newLikes = Math.max(0, likes - 1);
-      setLikes(newLikes);
-      setIsLiked(false);
-      localStorage.setItem(likesKey, newLikes.toString());
-      localStorage.setItem(isLikedKey, 'false');
-    } else {
-      const newLikes = likes + 1;
-      setLikes(newLikes);
-      setIsLiked(true);
-      localStorage.setItem(likesKey, newLikes.toString());
-      localStorage.setItem(isLikedKey, 'true');
+  const initArticleStats = async () => {
+    setLoadingStats(true);
+    try {
+      // 1. Tăng lượt xem (Upsert logic)
+      const { data: currentData } = await supabase
+        .from('article_stats')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      const newViews = (currentData?.views || 0) + 1;
+      const newLikes = currentData?.likes || 0;
+
+      await supabase.from('article_stats').upsert({ 
+        slug: slug, 
+        views: newViews,
+        likes: newLikes
+      });
+
+      setStats({ views: newViews, likes: newLikes });
+
+      // 2. Kiểm tra xem người dùng hiện tại đã thích chưa
+      if (user) {
+        const { data: likeData } = await supabase
+          .from('article_user_likes')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('article_slug', slug)
+          .single();
+        
+        setIsLiked(!!likeData);
+      }
+    } catch (err) {
+      console.error("Lỗi lấy chỉ số bài viết:", err);
+    } finally {
+      setLoadingStats(false);
     }
+  };
+
+  const handleLike = async () => {
+    if (!isLoggedIn) {
+      alert("Vui lòng đăng nhập để thả tim bài viết!");
+      navigate('/auth');
+      return;
+    }
+    if (!slug || !user || actionLoading) return;
+
+    setActionLoading(true);
+    try {
+      if (isLiked) {
+        // Hủy thích
+        await supabase
+          .from('article_user_likes')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('article_slug', slug);
+        
+        const newLikesCount = Math.max(0, stats.likes - 1);
+        await supabase.from('article_stats').update({ likes: newLikesCount }).eq('slug', slug);
+        
+        setStats(prev => ({ ...prev, likes: newLikesCount }));
+        setIsLiked(false);
+      } else {
+        // Thêm thích
+        const { error: likeError } = await supabase
+          .from('article_user_likes')
+          .insert({ user_id: user.id, article_slug: slug });
+
+        if (!likeError) {
+          const newLikesCount = stats.likes + 1;
+          await supabase.from('article_stats').update({ likes: newLikesCount }).eq('slug', slug);
+          
+          setStats(prev => ({ ...prev, likes: newLikesCount }));
+          setIsLiked(true);
+        }
+      }
+    } catch (err) {
+      console.error("Lỗi thao tác like:", err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleShareX = () => {
+    const text = encodeURIComponent(`Đọc bài viết: ${article?.title} trên Crypto2u Academy`);
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
   };
 
   if (!article) {
@@ -80,18 +127,6 @@ const ArticleDetail: React.FC = () => {
       </div>
     );
   }
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleShareX = () => {
-    const text = encodeURIComponent(`Đọc bài viết: ${article.title} trên Crypto2u Academy`);
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
-  };
 
   return (
     <div className="min-h-screen pt-24 pb-20 px-4 md:px-6">
@@ -115,13 +150,15 @@ const ArticleDetail: React.FC = () => {
                     <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-xs text-slate-500 font-medium">
                        <span className="flex items-center gap-1.5"><Calendar size={14} /> {article.date}</span>
                        <span className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400">
-                         <Eye size={14} /> {realtimeViews.toLocaleString()} lượt xem
+                         <Eye size={14} /> {loadingStats ? '...' : stats.views.toLocaleString()} lượt xem
                        </span>
                        <button 
                         onClick={handleLike}
-                        className={`flex items-center gap-1.5 transition ${isLiked ? 'text-pink-500 scale-110' : 'hover:text-pink-500'}`}
+                        disabled={actionLoading}
+                        className={`flex items-center gap-1.5 transition ${isLiked ? 'text-pink-500' : 'hover:text-pink-500'}`}
                        >
-                         <Heart size={14} className={isLiked ? 'fill-current' : ''} /> {likes.toLocaleString()} yêu thích
+                         {actionLoading ? <Loader2 size={14} className="animate-spin" /> : <Heart size={14} className={isLiked ? 'fill-current' : ''} />}
+                         {loadingStats ? '...' : stats.likes.toLocaleString()} yêu thích
                        </button>
                     </div>
                  </header>
@@ -149,11 +186,13 @@ const ArticleDetail: React.FC = () => {
                         <div className="flex gap-3 w-full sm:w-auto">
                           <button 
                             onClick={handleLike}
+                            disabled={actionLoading}
                             className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl border transition font-bold text-sm ${
                               isLiked ? 'bg-pink-500 text-white border-pink-500' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                             }`}
                           >
-                            <Heart size={16} className={isLiked ? 'fill-white' : ''} /> {isLiked ? 'Đã yêu thích' : 'Yêu thích'}
+                            {actionLoading ? <Loader2 size={16} className="animate-spin" /> : <Heart size={16} className={isLiked ? 'fill-white' : ''} />}
+                            {isLiked ? 'Đã yêu thích' : 'Yêu thích'}
                           </button>
                           <button 
                             onClick={handleShareX}

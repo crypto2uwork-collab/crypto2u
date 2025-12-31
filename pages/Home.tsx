@@ -1,19 +1,32 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowRight, Shield, Zap, Globe, TrendingUp, Layers, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { useSettings } from '../context/SettingsContext';
+import { supabase } from '../services/supabase';
 
 const Home: React.FC = () => {
   const { t, getContent } = useSettings();
   const { articles } = getContent();
+  const [stats, setStats] = useState<Record<string, any>>({});
 
   const featuredArticles = articles.filter(a => a.category === 'nghien-cuu').slice(0, 2);
   const latestArticles = articles.slice(0, 5);
 
-  const getLikes = (slug: string) => {
-    return localStorage.getItem(`crypto2u_likes_${slug}`) || '0';
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    const { data } = await supabase.from('article_stats').select('*');
+    if (data) {
+      const statsMap = data.reduce((acc, curr) => {
+        acc[curr.slug] = curr;
+        return acc;
+      }, {} as Record<string, any>);
+      setStats(statsMap);
+    }
   };
 
   return (
@@ -67,7 +80,7 @@ const Home: React.FC = () => {
                            <div className="aspect-video overflow-hidden bg-slate-200 relative">
                               <img src={a.image} alt={a.title} className="w-full h-full object-cover transition duration-500 group-hover:scale-105" />
                               <div className="absolute top-2 right-2 flex items-center gap-1 bg-white/80 dark:bg-slate-900/80 backdrop-blur px-2 py-1 rounded-lg text-[10px] font-bold text-pink-500">
-                                <Heart size={10} className="fill-pink-500" /> {getLikes(a.slug)}
+                                <Heart size={10} className="fill-pink-500" /> {stats[a.slug]?.likes || 0}
                               </div>
                            </div>
                            <div className="p-5">
@@ -93,9 +106,9 @@ const Home: React.FC = () => {
                            <div className="min-w-0 flex-1">
                               <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 transition">{a.title}</h3>
                               <div className="flex items-center gap-3 mt-1">
-                                <p className="text-[10px] text-slate-500">{a.date} • {a.views} {t('views')}</p>
+                                <p className="text-[10px] text-slate-500">{a.date} • {stats[a.slug]?.views || 0} {t('views')}</p>
                                 <span className="text-[10px] text-pink-500 font-bold flex items-center gap-0.5">
-                                  <Heart size={10} className="fill-pink-500" /> {getLikes(a.slug)}
+                                  <Heart size={10} className="fill-pink-500" /> {stats[a.slug]?.likes || 0}
                                 </span>
                               </div>
                            </div>
